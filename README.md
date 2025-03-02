@@ -1,5 +1,11 @@
 - [Spaghetti Code Collection](#spaghetti-code-collection)
-- [GPS Gaussian to Live（2025）](#gps-gaussian-to-live2025)
+- [GPS Gaussian to Live（2025-02~至今）](#gps-gaussian-to-live2025-02至今)
+
+> 在本repo中的`commit message`下，你会偶尔看到bruh type，即`bruh:[RANDOM SENTENSE]`。
+> 
+> 这个type的意思是小的未分类的commit，比如一些小的修改，或者是一些小的bugfix。
+>
+> ~~所以真的是〇山代码。~~
 
 # Spaghetti Code Collection
 Like a pile of spaghetti.
@@ -8,7 +14,13 @@ Like a pile of spaghetti.
 
 从2025年开始收集一点自己敲的〇山代码。
 
-# GPS Gaussian to Live（2025）
+2025年以前的：
+
+- [RoboAnalyzer-Carving(2022左右)](https://github.com/AkutaZehy/RoboAnalyzer-Carving)
+- [CrackDetection-Utils-for-Python(2024-02~2024-07)](https://github.com/AkutaZehy/CrackDetection-Utils-for-Python)
+- [book-sales-dbsystem(2024-11)](https://github.com/AkutaZehy/book-sales-dbsystem)
+
+# GPS Gaussian to Live（2025-02~至今）
 
 用实时的图片源产生崭新预测视角的Gaussian渲染。
 
