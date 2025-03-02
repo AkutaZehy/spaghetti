@@ -4,15 +4,13 @@
 > 在本repo中的`commit message`下，你会偶尔看到bruh type，即`bruh:[RANDOM SENTENSE]`。
 > 
 > 这个type的意思是小的未分类的commit，比如一些小的修改，或者是一些小的bugfix。
->
-> ~~所以真的是〇山代码。~~
+> 
+> 随机语句来自[RANDOM SENTENSE](https://randomwordgenerator.com/sentence.php)，非常感谢。
 
 # Spaghetti Code Collection
 Like a pile of spaghetti.
 
-〇山代码大合辑。
-
-从2025年开始收集一点自己敲的〇山代码。
+从2025年开始收集一点自己敲的代码，~~虽然都是没有太大用的东西但是看着有敲代码什么的很幸福吧~~。
 
 2025年以前的：
 
@@ -32,6 +30,6 @@ Like a pile of spaghetti.
 
 仓库中本部分代码中的gps_gaussian部分几乎全部来自于原版代码，因为脑瘫python的原因为了方便重命名把下划线去了；对其实现异常的部分进行了修改，如[issue 71](https://github.com/aipixel/GPS-Gaussian/issues/71)，另外对其结构略有调整以适应实时的图片源的数据结构。
 
-~~但由于是〇山代码，我自己其实也不大清楚哪块改了懒得找了，非常抱歉Orz~~
+~~我自己其实也不大清楚哪块改了懒得找了就没标，非常抱歉Orz~~
 
 预览窗格使用了[Dear PyGui](https://github.com/hoffstadt/DearPyGui)，这个也是MIT，作者是Jonathan Hoffstadt。
