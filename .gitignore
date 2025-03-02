@@ -1,0 +1,8 @@
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.pyc
+
+# gps_gaussian
+gps_gaussian/data/*
+gps_gaussian/models/*
+gps_gaussian/configs/*
