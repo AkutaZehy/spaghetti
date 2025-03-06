@@ -210,6 +210,9 @@ angle = 0
 intr_list = []
 extr_list = []
 
+positions = [0, 0, 0]
+rotations = [0, 0, 0]
+
 for i in range(camera_count):
     intr_name = os.path.join(config_parm_dir, f'{i}_intrinsic.npy')
     extr_name = os.path.join(config_parm_dir, f'{i}_extrinsic.npy')
@@ -253,9 +256,8 @@ def img2mask():
 video2cache(current_frame)
 img2mask()
 
-# def infer_frame_from_cache(self, view_select, img_list, mask_list, ratio=0.5, frame_id=0):
 # current_img = renderer.infer_frame_from_cache(view_select=src_view, img_list=img_list, mask_list=mask_list, ratio=ratio, frame_id=current_frame)
-current_img = renderer.infer_frame_from_cache(view_select=src_view, img_list=img_list, mask_list=mask_group, ratio=ratio, frame_id=current_frame)
+current_img = renderer.infer_frame_from_cache(view_select=src_view, img_list=img_list, mask_list=mask_group, ratio=ratio, frame_id=current_frame, position=positions, rotation=rotations)
 
 frame_width = 1600
 frame_height = 900
@@ -311,6 +313,17 @@ with dpg.window(tag='渲染图'):
     dpg.draw_image("camera_id_2", [0, box], [box, box*2])
     dpg.draw_image("image_id", [box, 0], [box*3, box*2])
         
+with dpg.window(label="位置控制帮助", modal=True, tag="position_help", no_title_bar=True, no_close=True, width=400, height=200, pos=[600, 200]):
+    dpg.add_text("X轴代表屏幕的左右方向（默认值：0），向右为正。")
+    dpg.add_text("Y轴代表屏幕的上下方向（默认值：0），向上为正。")
+    dpg.add_text("Z轴代表屏幕的前后方向（默认值：0），向前为正。")
+    dpg.add_button(label="好", width=200, pos=[100, 150], callback=lambda: dpg.configure_item("position_help", show=False))
+    
+with dpg.window(label="旋转控制帮助", modal=True, tag="rotation_help", no_title_bar=True, no_close=True, width=400, height=200, pos=[600, 200]):
+    dpg.add_text("rX代表沿着屏幕的水平轴旋转（默认值：0），顺时针旋转为正。")
+    dpg.add_text("rY代表沿着屏幕的垂直轴旋转（默认值：0），顺时针旋转为正。")
+    dpg.add_text("rZ代表垂直于屏幕的轴旋转（默认值：0），顺时针旋转为正。")
+    dpg.add_button(label="好", width=200, pos=[100, 150], callback=lambda: dpg.configure_item("rotation_help", show=False))
 
 with dpg.window(label="控制面板", pos=[1250, 0], tag="控制面板", width=350, height=900, no_close=True, no_move=True):
 
@@ -340,32 +353,74 @@ with dpg.window(label="控制面板", pos=[1250, 0], tag="控制面板", width=3
 
     # 设置观察机位
     dpg.add_text(f'设置视频机位')
-    dpg.add_text("第一机位")
-    dpg.add_same_line()
-    dpg.add_input_int(default_value=camera_1, tag="camera_1", width=-150, callback=lambda s,a,u :set_view1(dpg.get_value("camera_1")))
-    dpg.add_text("第二机位")
-    dpg.add_same_line()
-    dpg.add_input_int(default_value=camera_2, tag="camera_2", width=-150, callback=lambda s,a,u: set_view2(dpg.get_value("camera_2")))
+    with dpg.group(horizontal=True):
+        dpg.add_text("第一机位")
+        dpg.add_input_int(default_value=camera_1, tag="camera_1", width=-150, callback=lambda s,a,u :set_view1(dpg.get_value("camera_1")))
+    with dpg.group(horizontal=True):
+        dpg.add_text("第二机位")
+        dpg.add_input_int(default_value=camera_2, tag="camera_2", width=-150, callback=lambda s,a,u: set_view2(dpg.get_value("camera_2")))
 
     dpg.add_spacing(count=10)
 
     # 添加一个旋转角度的滑块，比例保留一位小数
-    # dpg.add_text(f"当前机位: {src_view}, 比例: {ratio:.1f}", tag="text_view")
     dpg.add_text("渲染控制")
 
-    dpg.add_text("旋转角度")
-    dpg.add_text("Y轴旋转")
-    dpg.add_same_line()
-    dpg.add_slider_float(default_value=0.0, min_value=-180.0, max_value=180.0, tag="slider_angle", callback=lambda s,a,u: set_view(dpg.get_value("slider_angle")))
+    dpg.add_text(f"当前左机位：{src_view[0]}, 右机位：{src_view[1]}", tag="text_view")
+    with dpg.group(horizontal=True):
+        dpg.add_text("机位旋转")
+        dpg.add_slider_float(default_value=0.0, min_value=-180.0, max_value=180.0, tag="slider_angle", callback=lambda s,a,u: set_view(dpg.get_value("slider_angle")))
+    
+    dpg.add_spacing(count=10)
 
+    # 配置世界坐标位移与旋转的修改
+    with dpg.group(horizontal=True):
+        dpg.add_text("世界坐标位移")
+        dpg.add_button(label="?", callback=lambda: dpg.configure_item("position_help", show=True))
+    with dpg.group(horizontal=True):
+        dpg.add_text("X")
+        dpg.add_slider_float(default_value=0.0, min_value=-2.0, max_value=2.0, tag="slider_x", callback=lambda s,a,u: set_position(dpg.get_value("slider_x"), positions[1], positions[2]))
+        dpg.add_text("m")
+    with dpg.group(horizontal=True):
+        dpg.add_text("Y")
+        dpg.add_slider_float(default_value=0.0, min_value=-2.0, max_value=2.0, tag="slider_y", callback=lambda s,a,u: set_position(positions[0], dpg.get_value("slider_y"), positions[2]))
+        dpg.add_text("m")
+    with dpg.group(horizontal=True):
+        dpg.add_text("Z")
+        dpg.add_slider_float(default_value=0.0, min_value=-2.0, max_value=2.0, tag="slider_z", callback=lambda s,a,u: set_position(positions[0], positions[1], dpg.get_value("slider_z")))
+        dpg.add_text("m")
+    dpg.add_spacing(count=10)
+    
+    with dpg.group(horizontal=True):
+        dpg.add_text("世界坐标旋转")
+        dpg.add_button(label="?", callback=lambda: dpg.configure_item("rotation_help", show=True))
+    with dpg.group(horizontal=True):
+        dpg.add_text("rX")
+        dpg.add_slider_float(default_value=0.0, min_value=-180.0, max_value=180.0, tag="slider_rx", callback=lambda s,a,u: set_rotation(dpg.get_value("slider_rx"), rotations[1], rotations[2]))
+        dpg.add_text("°")
+    with dpg.group(horizontal=True):
+        dpg.add_text("rY")
+        dpg.add_slider_float(default_value=0.0, min_value=-180.0, max_value=180.0, tag="slider_ry", callback=lambda s,a,u: set_rotation(rotations[0], dpg.get_value("slider_ry"), rotations[2]))
+        dpg.add_text("°")
+    with dpg.group(horizontal=True):
+        dpg.add_text("rZ")
+        dpg.add_slider_float(default_value=0.0, min_value=-180.0, max_value=180.0, tag="slider_rz", callback=lambda s,a,u: set_rotation(rotations[0], rotations[1], dpg.get_value("slider_rz")))
+        dpg.add_text("°")
+        
+    dpg.add_spacing(count=10)
+    
+    dpg.add_button(label="重置变换", callback=lambda: reset())
+        
 # 渲染回调
 def render_callback():
-    global current_frame, renderer, src_view, ratio, current_camera, camera_1, camera_2
-    video2cache(current_frame)
+    global current_frame, renderer, src_view, ratio, current_camera, camera_1, camera_2, positions, rotations
+    if camera_1 >= 16 or camera_2 >= 16 or camera_1 < 0 or camera_2 < 0:
+        return
+    if not video2cache(current_frame):
+        return
     # current_img_new = renderer.infer_frame(view_select=src_view, ratio=ratio, frame_id=current_frame)
     img2mask()
     # current_img_new = renderer.infer_frame_from_cache(view_select=src_view, img_list=img_list, mask_list=mask_list, ratio=ratio, frame_id=current_frame)
-    current_img_new = renderer.infer_frame_from_cache(view_select=src_view, img_list=img_list, mask_list=mask_group, ratio=ratio, frame_id=current_frame)
+    current_img_new = renderer.infer_frame_from_cache(view_select=src_view, img_list=img_list, mask_list=mask_group, ratio=ratio, frame_id=current_frame, position=positions, rotation=rotations)
     # width_1, height_1, channels_1, data_1 = dpg.load_image(current_camera % (current_frame, camera_1))
     # width_2, height_2, channels_2, data_2 = dpg.load_image(current_camera % (current_frame, camera_2))
     width, height, channels, data = img_to_texture(current_img_new)
@@ -411,7 +466,7 @@ def set_view(value):
     index = int(angle / 22.5) % 16
     src_view = get_src_view_from_index(index)
     ratio = (angle + 11.25) % 22.5 / 22.5
-    # dpg.set_value("text_view", f"当前机位: {src_view}, 比例: {ratio:.1f}")
+    dpg.set_value("text_view", f"当前左机位：{src_view[0]}, 右机位：{src_view[1]}")
     render_callback()
 
 def set_view1(value):
@@ -424,9 +479,36 @@ def set_view1(value):
 def set_view2(value):
     global camera_1, camera_2
     if -1 < value and value < 16:
-        if value != camera_1:
+        if value!= camera_1:
             camera_2 = value
     render_callback()
+
+def set_position(x, y, z):
+    global positions
+    positions = [x, y*-1, z*-1]
+    render_callback()
+    
+def set_rotation(rx, ry, rz):
+    global rotations
+    rotations = [rx, ry*-1, rz]
+    render_callback()
+    
+def reset():
+    global positions, rotations, camera_1, camera_2
+    positions = [0, 0, 0]
+    rotations = [0, 0, 0]
+    camera_1 = 0
+    camera_2 = 4
+    
+    dpg.set_value("slider_x", 0.0)
+    dpg.set_value("slider_y", 0.0)
+    dpg.set_value("slider_z", 0.0)
+    dpg.set_value("slider_rx", 0.0)
+    dpg.set_value("slider_ry", 0.0)
+    dpg.set_value("slider_rz", 0.0)
+    dpg.set_value("slider_angle", 0.0)
+    
+    set_view(0)
 
 def step_render_callback():
     global step

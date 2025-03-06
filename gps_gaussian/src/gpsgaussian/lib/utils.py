@@ -6,7 +6,7 @@ from scipy.spatial.transform import Slerp
 from lib.graphics_utils import getWorld2View2, getProjectionMatrix, focal2fov
 
 
-def get_novel_calib(data, opt, ratio=0.5, intr_key='intr', extr_key='extr'):
+def get_novel_calib(data, opt, ratio=0.5, intr_key='intr', extr_key='extr', position=None, rotation=None):
     bs = data['lmain'][intr_key].shape[0]
     fovx_list, fovy_list, world_view_transform_list, full_proj_transform_list, camera_center_list = [], [], [], [], []
     for i in range(bs):
@@ -21,10 +21,25 @@ def get_novel_calib(data, opt, ratio=0.5, intr_key='intr', extr_key='extr'):
         key_times = [0, 1]
         slerp = Slerp(key_times, rots)
         rot = slerp(ratio)
+        
+        # 调整位姿
+        trans = ((1.0 - ratio) * extr0 + ratio * extr1)[:3, 3]
+        
+        if rotation is not None:
+            rx, ry, rz = rotation
+            extra_rot = Rot.from_euler('xyz', [rx, ry, rz], degrees=True).as_matrix()
+            rot = extra_rot @ rot.as_matrix()
+            rot = Rot.from_matrix(rot)
+            
+        if position is not None:
+            x, y, z = position
+            trans = trans + np.array([x, y, z])
+        
+        # 构建新的位姿矩阵
         npose = np.diag([1.0, 1.0, 1.0, 1.0])
         npose = npose.astype(np.float32)
         npose[:3, :3] = rot.as_matrix()
-        npose[:3, 3] = ((1.0 - ratio) * extr0 + ratio * extr1)[:3, 3]
+        npose[:3, 3] = trans
         extr_new = npose[:3, :]
         intr_new = ((1.0 - ratio) * intr0 + ratio * intr1)
 

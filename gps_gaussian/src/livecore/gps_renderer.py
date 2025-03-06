@@ -65,10 +65,10 @@ class GPSRenderer:
 
         return render_novel
     
-    def infer_frame_from_cache(self, view_select, img_list, mask_list, ratio=0.5, frame_id=0):
+    def infer_frame_from_cache(self, view_select, img_list, mask_list, ratio=0.5, frame_id=0, position=None, rotation=None):
         item = self.get_dict(img_list, mask_list, view_select, frame_id)
         data = self.fetch_data(item)
-        data = get_novel_calib(data, self.opt, ratio=ratio, intr_key='intr_ori', extr_key='extr_ori')
+        data = get_novel_calib(data, self.opt, ratio=ratio, intr_key='intr_ori', extr_key='extr_ori', position=position, rotation=rotation)
         
         with torch.no_grad():
             data, _, _ = self.model(data, is_train=False)
