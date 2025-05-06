@@ -1,0 +1,20 @@
+_BASE_: ../maskformer2_R50_bs16_160k.yaml
+MODEL:
+  BACKBONE:
+    NAME: "D2MobileNetV3"
+  
+  MOBILENET:
+    ARCHITECTURE: "large"  # 可选"small"或"large"
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    PRETRAINED: True
+    WIDTH_MULT: 1.0
+    DROP_PATH_RATE: 0.2
+
+  WEIGHTS: ""
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+
+  MASK_FORMER:
+    NUM_OBJECT_QUERIES: 100
+SOLVER:
+  MAX_ITER: 160000

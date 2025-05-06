@@ -1,0 +1,6 @@
+# Copyright (c) Facebook, Inc. and its affiliates.
+from .maskformer_transformer_decoder import StandardTransformerDecoder
+from .mask2former_transformer_decoder import MultiScaleMaskedTransformerDecoder
+from .custom_transformer_decoder import CustomMultiScaleMaskedTransformerDecoder
+from .custom_transformer_decoder import FCX3, FCBE, QA
+from .multitask_transformer_decoder import MultiTaskTransformerDecoder, QAMultiTaskTransformerDecoder
